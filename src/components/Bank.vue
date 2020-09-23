@@ -38,6 +38,10 @@
       <br>
       <p>Saldo da conta: R${{account.balance}}</p>
     </div>
+    <div v-if="account.message != null">
+      <br>
+      <p>{{account.message}}</p>
+    </div>
   </div>
 </template>
 
@@ -62,6 +66,10 @@
         /** Realiza o depósito */
         if(this.deposit.amount === 0){
           this.deposit.message = 'Valor precisa ser maior que 0';
+          return;
+        }
+        if(this.account.account === '' || this.account.branch === ''){
+          this.deposit.message = 'Por favor, preencha os dados corretamanete.';
           return;
         }
         var data = {
@@ -97,6 +105,10 @@
           this.withdraw.message = 'Valor precisa ser maior que 0';
           return;
         }
+        if(this.account.account === '' || this.account.branch === ''){
+          this.withdraw.message = 'Por favor, preencha os dados corretamanete.';
+          return;
+        }
         var data = {
           account: this.account.account,
           branch: this.account.branch,
@@ -125,6 +137,11 @@
           });
       },
       showBalance() {
+        if(this.account.account === '' || this.account.branch === ''){
+          this.account.balance = null;
+          this.account.message = 'Por favor, preencha os dados corretamanete.';
+          return;
+        }
         /** Retorna o saldo da conta */
         fetch("http://127.0.0.1:8000/api/currentaccount/balance?account=" + this.account.account + "&branch=" + this.account.branch, {
           "method": "GET",
@@ -141,6 +158,7 @@
           .then(response => {
             console.log(response);
             this.account.balance = response;
+            this.account.message = null;
             this.deposit.showAmountInput = false;
             this.withdraw.showAmountInput = false;
           })
@@ -155,7 +173,8 @@
         account: {
           branch: '',
           account: '',
-          balance: null
+          balance: null,
+          message: null
         },
         deposit: {
           amount: 0,
